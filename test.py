@@ -6,11 +6,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # API configuration
+# place .env file in folder with .py -> it should cointain (API_KEY=<key>)
 api_key = os.getenv("API_KEY")  # Replace with your API key
 base_url = "https://chat-ai.academiccloud.de/v1"
 model = "qwen3.5-397b-a17b"  # Choose any available model
 
-# Start OpenAI client
 client = OpenAI(
     api_key=api_key,
     base_url=base_url
