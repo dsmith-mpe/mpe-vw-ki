@@ -1,6 +1,5 @@
 from openai import OpenAI
 from collections import deque
-import json
 import os
 from dotenv import load_dotenv
 
