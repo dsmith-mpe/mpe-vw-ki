@@ -2,71 +2,72 @@ from openai import OpenAI
 from collections import deque
 import os
 from dotenv import load_dotenv
+import json
 
 
 load_dotenv()
+
+
+with open("PT2_MPG/System-Prompt_in_ChatAI_Profil_PT2_MPG.json", "r") as file:
+    data = json.load(file)
 # API configuration
 # place .env file in folder with .py -> it should cointain (API_KEY=<key>)
 api_key = os.getenv("API_KEY")  # Replace with your API key
 base_url = "https://chat-ai.academiccloud.de/v1"
 model_url = "https://chat-ai.academiccloud.de/v1"
-model = "qwen3.5-397b-a17b"  # Choose any available model
+# model = "qwen3.5-397b-a17b"  # Choose any available model
+model = data["model"]  # Choose any available model
+arcana = data["arcana"]
 
-client = OpenAI(
-    api_key=api_key,
-    base_url=base_url
-)
-
-
-def get_models():
-    response = client.models.list()
-    print("Available models: \n")
-    for model in response.data:
-        print(f"{model.id}\n")
+client = OpenAI(api_key=api_key, base_url=base_url)
 
 
-get_models()
+# def get_models():
+#    response = client.models.list()
+#    print("Available models: \n")
+#    for model in response.data:
+#        print(f"{model.id}\n")
+#
+#
+# get_models()
 
 
 MAX_SIZE = 10
 chat_history = deque(maxlen=MAX_SIZE)
 
-SYSTEM_PROMPT = {"role": "system", "content": "You are a helpful assistant"}
+
+SYSTEM_PROMPT = data["messages"]
+
+# SYSTEM_PROMPT = {"role": "system", "content": "You are a helpful assistant"}
 
 print("Chat started! Type 'exit' or 'quit' to stop.\n")
 
 while True:
-    prompt = input("You: ")
+    try:
+        prompt = input("You: ")
 
-    # Exit condition
-    if prompt.lower() in ("exit", "quit"):
-        print("Chat ended.")
-        break
+        # Exit condition
+        if prompt.lower() in ("exit", "quit"):
+            print("Chat ended.")
+            break
 
-    # Add user message
-    chat_history.append({
-        "role": "user",
-        "content": prompt
-    })
+        # Add user message
+        chat_history.append({"role": "user", "content": prompt})
 
-    # Build conversation context
-    messages = [
-        SYSTEM_PROMPT,
-        *chat_history
-    ]
+        # Build conversation context
+        messages = [*SYSTEM_PROMPT, *chat_history]
 
-    # Get assistant response
-    chat_completion = client.chat.completions.create(
-        messages=messages,
-        model=model,
-    )
+        # Get assistant response
+        chat_completion = client.chat.completions.create(
+            messages=messages,
+            model=model,
+        )
 
-    response = chat_completion.choices[0].message.content
+        response = chat_completion.choices[0].message.content
 
-    print(f"\nAssistant: {response}\n")
+        print(f"\nAssistant: {response}\n")
 
-    # Store assistant response
-    chat_history.append({
-        "role": "assistant",
-        "content": response
-    })
+        # Store assistant response
+        chat_history.append({"role": "assistant", "content": response})
+    except Exception as e:
+        print(f"Error occured: {e}")
